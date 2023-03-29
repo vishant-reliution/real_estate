@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="property_types_form_view" model="ir.ui.view">
+        <field name="name">property.types.form.view</field>
+        <field name="model">property_types</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="property_types_tree_view" model="ir.ui.view">
+        <field name="name">property.types.tree.view</field>
+        <field name="model">property_types</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="property_type_action" model="ir.actions.act_window">
+        <field name="name">Property Types</field>
+        <field name="res_model">property_types</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="setting_menu" name="Settings" parent="real_estate"/>
+    <menuitem id="property_types_menu" name="Property Types" action="property_type_action" parent="setting_menu"/>
+
+</odoo>
