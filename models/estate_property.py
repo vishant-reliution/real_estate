@@ -57,14 +57,15 @@ class EstateProperty(models.Model):
         for rec in self:
             rec.total_area = rec.garden_area + rec.living_area
 
-    @api.depends('offer_ids.price')
-    def _compute_best_price(self):
-        for rec in self:
-            if rec.offer_ids.price:
-                print("before list")
-                # price_list = list(rec.offer_ids.price)
-                print("after list")
-                rec.best_price = rec.offer_ids.price
-                print("after 1st price assign as a best price")
-                rec.best_price = max(rec.offer_ids.price)
-                print("after max function")
+
+    # @api.depends('offer_ids.price')
+    # def _compute_best_price(self):
+    #     for rec in self:
+    #         if rec.offer_ids:
+    #             for record in rec.offer_ids:
+    #                 print("record :::")
+    #                 result = map(max, record.price)
+    #                 price_list = list(record.price)
+    #                 rec.best_price = record.price
+    #                 # rec.best_price = max(price_list)
+
