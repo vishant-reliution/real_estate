@@ -26,10 +26,12 @@ class PropertOffer(models.Model):
     property_id = fields.Many2one("estate.property")
     validity = fields.Integer(string="Validity", compute="_compute_validity", store=True)
     date_deadline = fields.Date(string="Deadline")
+    create_date = fields.Date(string='Creation Date', readonly=True, index=True, help="Date on which offer is created.")
 
     @api.depends('date_deadline')
     def _compute_validity(self):
         for rec in self:
-            create_date = date.today()
-            # rec.validity = rec.date_deadline.day - create_date.day
-            rec.validity = create_date - relativedelta.relativedelta(days=rec.date_deadline)
+            if rec.date_deadline:
+                rec.validity = rec.date_deadline.day - rec.create_date.day
+            else:
+                rec.validity = '0'
