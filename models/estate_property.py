@@ -42,6 +42,7 @@ class EstateProperty(models.Model):
     offer_ids = fields.One2many("property.offer", "property_id")
     total_area = fields.Integer(string="Total Area(sqm)", compute="_compute_area")
     best_price = fields.Float(string="Best Price", compute="_compute_best_price", store=True)
+    status = fields.Char(string="Status", readonly=True, default='New')
 
     @api.onchange('garden')
     def _onchange_garden(self):
@@ -63,3 +64,9 @@ class EstateProperty(models.Model):
         for rec in self:
             if rec.offer_ids:
                 rec.best_price = max(rec.offer_ids.mapped("price"))
+
+    def action_sold(self):
+        self.status = 'Sold'
+
+    def action_cancel(self):
+        self.status = 'Canceled'

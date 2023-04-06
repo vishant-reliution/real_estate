@@ -24,14 +24,37 @@ class PropertOffer(models.Model):
     ], copy=False, string="Status")
     partner_id = fields.Many2one("res.partner", string="Partner")
     property_id = fields.Many2one("estate.property")
-    validity = fields.Integer(string="Validity", compute="_compute_validity", store=True)
+    validity = fields.Integer(string="Validity", compute="_compute_validity", inverse="_inverse_validity", store=True)
     date_deadline = fields.Date(string="Deadline")
-    create_date = fields.Date(string='Creation Date', readonly=True, index=True, help="Date on which offer is created.")
+    create_date = fields.Date(string='Creation Date', readonly=True, default=fields.Date.today())
+
+    def test_exception(self):
+        raise ValidationError(_("You can't enter past dates."))
 
     @api.depends('date_deadline')
     def _compute_validity(self):
         for rec in self:
             if rec.date_deadline:
-                rec.validity = rec.date_deadline.day - rec.create_date.day
+                days = rec.date_deadline.day - rec.create_date.day
+                months = (rec.date_deadline.month - rec.create_date.month) * 30
+                years = (rec.date_deadline.year - rec.create_date.year) * 365
+                if rec.date_deadline.year > rec.create_date.year:
+                    rec.validity = (days + months + years)
+                elif rec.date_deadline.year == rec.create_date.year:
+                    if rec.date_deadline.month > rec.create_date.month:
+                        rec.validity = (days + months + years)
+                    elif rec.date_deadline.month == rec.create_date.month:
+                        if rec.date_deadline.day >= rec.create_date.day:
+                            rec.validity = (days + months + years)
+                        else:
+                            rec.test_exception()
+                    else:
+                        rec.test_exception()
+                else:
+                    rec.test_exception()
             else:
                 rec.validity = '0'
+
+    def _inverse_validity(self):
+        for rec in self:
+            rec.date_deadline = rec.create_date + timedelta(days=rec.validity)
