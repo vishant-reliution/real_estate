@@ -28,7 +28,7 @@ class PropertOffer(models.Model):
     date_deadline = fields.Date(string="Deadline")
     create_date = fields.Date(string='Creation Date', readonly=True, default=fields.Date.today())
 
-    def test_exception(self):
+    def date_exception(self):
         raise ValidationError(_("You can't enter past dates."))
 
     @api.depends('date_deadline')
@@ -47,14 +47,17 @@ class PropertOffer(models.Model):
                         if rec.date_deadline.day >= rec.create_date.day:
                             rec.validity = (days + months + years)
                         else:
-                            rec.test_exception()
+                            rec.date_exception()
                     else:
-                        rec.test_exception()
+                        rec.date_exception()
                 else:
-                    rec.test_exception()
+                    rec.date_exception()
             else:
                 rec.validity = '0'
 
     def _inverse_validity(self):
         for rec in self:
             rec.date_deadline = rec.create_date + timedelta(days=rec.validity)
+
+    # def action_accept(self):
+

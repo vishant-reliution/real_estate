@@ -65,8 +65,20 @@ class EstateProperty(models.Model):
             if rec.offer_ids:
                 rec.best_price = max(rec.offer_ids.mapped("price"))
 
+    def cancel_status_exception(self):
+        raise UserError(_("Canceled properties cannot be sold."))
+
+    def sold_status_exception(self):
+        raise UserError(_("Sold properties cannot be canceled"))
+
     def action_sold(self):
-        self.status = 'Sold'
+        if self.status == 'New' or self.status == 'Sold' or self.status == 0:
+            self.status = 'Sold'
+        else:
+            self.cancel_status_exception()
 
     def action_cancel(self):
-        self.status = 'Canceled'
+        if self.status == 'New' or self.status == 'Canceled' or self.status == 0:
+            self.status = 'Canceled'
+        else:
+            self.sold_status_exception()
