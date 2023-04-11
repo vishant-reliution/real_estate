@@ -59,5 +59,21 @@ class PropertOffer(models.Model):
         for rec in self:
             rec.date_deadline = rec.create_date + timedelta(days=rec.validity)
 
-    # def action_accept(self):
+    def action_accept(self):
+        self.status = 'accepted'
+        if self.price:
+            self.property_id.selling_price = self.price
+            self.property_id.buyer_id = self.partner_id
 
+    def action_refused(self):
+        self.status = 'refused'
+
+    # _sql_constraints = [
+    #     ('price_check', 'CHECK (price>0)', 'Offer price must be positive.')
+    # ]
+
+    @api.constrains('price')
+    def _check_price(self):
+        for rec in self:
+            if rec.price <= 0:
+                raise ValidationError(_('Offer price must be strictly positive.'))

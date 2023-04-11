@@ -16,4 +16,9 @@ class PropertyTypes(models.Model):
     _name = "property_types"
     _description = "List of property types"
 
-    name = fields.Char(string="Name", required=True)
+    name = fields.Char(required=True)
+    property_ids = fields.One2many("estate.property", "property_type_id")
+
+    _sql_constraints = [
+        ('name_unique', 'UNIQUE(name)', 'Property Type must be Unique.')
+    ]

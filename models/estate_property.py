@@ -8,7 +8,7 @@ import json
 from odoo import api, fields, models, SUPERUSER_ID, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.osv import expression
-from odoo.tools import float_is_zero, html_keep_url, is_html_empty
+from odoo.tools import float_is_zero, html_keep_url, is_html_empty, float_utils, float_compare
 
 from odoo.addons.payment import utils as payment_utils
 
@@ -35,7 +35,7 @@ class EstateProperty(models.Model):
         ('east', 'East'),
         ('west', 'West')
     ], string='Garden Orientation')
-    property_type_id = fields.Integer(string="Property ID")
+    property_type_id = fields.Many2one("property_types", string="Property Type")
     salesman_id = fields.Many2one("res.partner", "Salesman")
     buyer_id = fields.Many2one("res.partner", "Buyer")
     tag_ids = fields.Many2many("property.tags")
@@ -82,3 +82,17 @@ class EstateProperty(models.Model):
             self.status = 'Canceled'
         else:
             self.sold_status_exception()
+
+    _sql_constraints = [
+        ('expected_price_check', 'CHECK (expected_price>0)', 'Expected price must be strictly positive'),
+        ('selling_price_check', 'CHECK (selling_price>=0)', 'Selling price must be positive'),
+    ]
+
+    @api.constrains('selling_price', 'expected_price')
+    def _check_selling_price(self):
+        for record in self.offer_ids:
+            if record.status == 'accepted':
+                if self.selling_price < (0.90 * self.expected_price):
+                    raise ValidationError(_('The selling price must be at least of 90% of the expected price if you '
+                                            'want to accept the offer.'))
+
