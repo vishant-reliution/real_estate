@@ -12,12 +12,15 @@ from odoo.tools import float_is_zero, html_keep_url, is_html_empty
 
 from odoo.addons.payment import utils as payment_utils
 
+
 class PropertyTypes(models.Model):
     _name = "property_types"
     _description = "List of property types"
+    _order = "name"
 
     name = fields.Char(required=True)
     property_ids = fields.One2many("estate.property", "property_type_id")
+    sequence = fields.Integer(string="Sequence")
 
     _sql_constraints = [
         ('name_unique', 'UNIQUE(name)', 'Property Type must be Unique.')

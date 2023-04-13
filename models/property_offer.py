@@ -13,9 +13,12 @@ from odoo.tools import float_is_zero, html_keep_url, is_html_empty
 from odoo.addons.payment import utils as payment_utils
 from datetime import date
 from dateutil import relativedelta
-class PropertOffer(models.Model):
+
+
+class PropertyOffer(models.Model):
     _name = 'property.offer'
     _description = 'List of offers'
+    _order = "price desc"
 
     price = fields.Float(string="Price")
     status = fields.Selection([
@@ -64,6 +67,7 @@ class PropertOffer(models.Model):
         if self.price:
             self.property_id.selling_price = self.price
             self.property_id.buyer_id = self.partner_id
+            self.property_id.state = 'offer_accepted'
 
     def action_refused(self):
         self.status = 'refused'

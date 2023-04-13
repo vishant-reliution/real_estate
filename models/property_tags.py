@@ -12,11 +12,14 @@ from odoo.tools import float_is_zero, html_keep_url, is_html_empty
 
 from odoo.addons.payment import utils as payment_utils
 
+
 class PropertyTags(models.Model):
     _name = "property.tags"
     _description = "List of property tags"
+    _order = "name"
 
     name = fields.Char(string="Name", required=True)
+    color = fields.Integer(string="Color")
 
     _sql_constraints = [
         ('tag_unique', 'UNIQUE(name)', 'Property Tag must be Unique.')

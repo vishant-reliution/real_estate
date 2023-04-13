@@ -16,6 +16,7 @@ from odoo.addons.payment import utils as payment_utils
 class EstateProperty(models.Model):
     _name = "estate.property"
     _description = "Details of estate property"
+    _order = "id desc"
 
     name = fields.Char(string="Name", required=True)
     description = fields.Text(string="Description")
@@ -43,6 +44,13 @@ class EstateProperty(models.Model):
     total_area = fields.Integer(string="Total Area(sqm)", compute="_compute_area")
     best_price = fields.Float(string="Best Price", compute="_compute_best_price", store=True)
     status = fields.Char(string="Status", readonly=True, default='New')
+    state = fields.Selection([
+        ('new', 'New'),
+        ('offer_received', 'Offer received'),
+        ('offer_accepted', 'Offer Accepted'),
+        ('sold', 'Sold'),
+        ('cancel', 'Canceled')
+    ], default='new', string="State")
 
     @api.onchange('garden')
     def _onchange_garden(self):
@@ -74,12 +82,14 @@ class EstateProperty(models.Model):
     def action_sold(self):
         if self.status == 'New' or self.status == 'Sold' or self.status == 0:
             self.status = 'Sold'
+            self.state = 'sold'
         else:
             self.cancel_status_exception()
 
     def action_cancel(self):
         if self.status == 'New' or self.status == 'Canceled' or self.status == 0:
             self.status = 'Canceled'
+            self.state = 'cancel'
         else:
             self.sold_status_exception()
 
@@ -96,3 +106,10 @@ class EstateProperty(models.Model):
                     raise ValidationError(_('The selling price must be at least of 90% of the expected price if you '
                                             'want to accept the offer.'))
 
+    @api.onchange('offer_ids')
+    def _offer_receive(self):
+        for rec in self.offer_ids:
+            if rec.price:
+                self.state = 'offer_received'
+            else:
+                self.state = 'new'
