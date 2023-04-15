@@ -21,7 +21,23 @@ class PropertyTypes(models.Model):
     name = fields.Char(required=True)
     property_ids = fields.One2many("estate.property", "property_type_id")
     sequence = fields.Integer(string="Sequence")
+    offer_count = fields.Integer(compute="_compute_offer_count")
+
+    @api.depends('name')
+    def _compute_offer_count(self):
+        for rec in self:
+            rec.offer_count = self.env['property.offer'].search_count([('property_id.property_type_id', '=', rec.name)])
 
     _sql_constraints = [
         ('name_unique', 'UNIQUE(name)', 'Property Type must be Unique.')
     ]
+
+    def action_view_offers(self):
+        return {
+            'name': 'Offers',
+            'res_model': 'property.offer',
+            'view_mode': 'list,form',
+            'domain': [("property_id.property_type_id", "=", self.name)],
+            'target': 'current',
+            'type': 'ir.actions.act_window',
+        }
