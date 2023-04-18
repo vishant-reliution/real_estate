@@ -106,10 +106,28 @@ class EstateProperty(models.Model):
                     raise ValidationError(_('The selling price must be at least of 90% of the expected price if you '
                                             'want to accept the offer.'))
 
-    @api.onchange('offer_ids')
-    def _offer_receive(self):
-        for rec in self.offer_ids:
-            if rec.price:
-                self.state = 'offer_received'
-            else:
-                self.state = 'new'
+    @api.ondelete(at_uninstall=False)
+    def _check_state(self):
+        for rec in self:
+            if rec.state == 'offer_received' or rec.state == 'offer_accepted' or rec.state == 'sold':
+                raise ValidationError(_('Only new and canceled properties can be deleted.'))
+
+    @api.model
+    def create(self, vals):
+        if vals.get('offer_ids'):
+            vals['state'] = 'offer_received'
+        res = super(EstateProperty, self).create(vals)
+        return res
+        # for rec in self.offer_ids:
+        #     if rec.price:
+        #         self.state = 'offer_received'
+
+
+
+    # @api.onchange('offer_ids')
+    # def _offer_receive(self):
+    #     for rec in self.offer_ids:
+    #         if rec.price:
+    #             self.state = 'offer_received'
+    #         else:
+    #             self.state = 'new'

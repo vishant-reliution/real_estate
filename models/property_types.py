@@ -29,7 +29,7 @@ class PropertyTypes(models.Model):
             rec.offer_count = self.env['property.offer'].search_count([('property_id.property_type_id', '=', rec.name)])
 
     _sql_constraints = [
-        ('name_unique', 'UNIQUE(name)', 'Property Type must be Unique.')
+        ('name_unique', 'UNIQUE(name)', 'Property type must be Unique.')
     ]
 
     def action_view_offers(self):
@@ -40,4 +40,4 @@ class PropertyTypes(models.Model):
             'domain': [("property_id.property_type_id", "=", self.name)],
             'target': 'current',
             'type': 'ir.actions.act_window',
-        }
+                }
