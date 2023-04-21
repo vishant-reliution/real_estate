@@ -81,3 +81,17 @@ class PropertyOffer(models.Model):
         for rec in self:
             if rec.price <= 0:
                 raise ValidationError(_('Offer price must be strictly positive.'))
+
+    def check_offer_price(self):
+        for rec in self.property_id.offer_ids:
+            for i in range(len(self.property_id.offer_ids)):
+                if str(rec.price)[i + 1] <= str(rec.price)[i]:
+                    raise ValidationError(_('offer must be greater than {}'.format(self.property_id.best_price)))
+
+    @api.model
+    def create(self, vals):
+        res = super(PropertyOffer, self).create(vals)
+        if vals['price'] < self.env['estate.property'].browse(vals['property_id']).best_price:
+            raise ValidationError(_('offer must be greater than {}'.format(
+                self.env['estate.property'].browse(vals['property_id']).best_price)))
+        return res

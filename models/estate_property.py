@@ -37,7 +37,7 @@ class EstateProperty(models.Model):
         ('west', 'West')
     ], string='Garden Orientation')
     property_type_id = fields.Many2one("property_types", string="Property Type")
-    salesman_id = fields.Many2one("res.partner", "Salesman")
+    salesman_id = fields.Many2one("res.users", "Salesman")
     buyer_id = fields.Many2one("res.partner", "Buyer")
     tag_ids = fields.Many2many("property.tags")
     offer_ids = fields.One2many("property.offer", "property_id")
@@ -51,6 +51,7 @@ class EstateProperty(models.Model):
         ('sold', 'Sold'),
         ('cancel', 'Canceled')
     ], default='new', string="State")
+    user_id = fields.Many2one('res.users')
 
     @api.onchange('garden')
     def _onchange_garden(self):
@@ -118,11 +119,6 @@ class EstateProperty(models.Model):
             vals['state'] = 'offer_received'
         res = super(EstateProperty, self).create(vals)
         return res
-        # for rec in self.offer_ids:
-        #     if rec.price:
-        #         self.state = 'offer_received'
-
-
 
     # @api.onchange('offer_ids')
     # def _offer_receive(self):
@@ -131,3 +127,9 @@ class EstateProperty(models.Model):
     #             self.state = 'offer_received'
     #         else:
     #             self.state = 'new'
+
+
+class ResUsers(models.Model):
+    _inherit = 'res.users'
+
+    property_ids = fields.One2many('estate.property', 'user_id')
