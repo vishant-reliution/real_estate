@@ -91,7 +91,7 @@ class PropertyOffer(models.Model):
     @api.model
     def create(self, vals):
         res = super(PropertyOffer, self).create(vals)
-        if vals['price'] < self.env['estate.property'].browse(vals['property_id']).best_price:
-            raise ValidationError(_('offer must be greater than {}'.format(
-                self.env['estate.property'].browse(vals['property_id']).best_price)))
+        offer_record = self.env['estate.property'].browse(vals['property_id'])
+        if vals['price'] < offer_record.best_price:
+            raise ValidationError(_('offer must be greater than {}'.format(offer_record.best_price)))
         return res
